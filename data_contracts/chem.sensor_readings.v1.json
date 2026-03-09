@@ -1,0 +1,52 @@
+{
+  "title": "chem.sensor_readings.v1",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_ts",
+    "equipment_id",
+    "sensor_id",
+    "metric_name",
+    "metric_value",
+    "metric_unit",
+    "quality_flag"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ingestion_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_system": {
+      "type": "string"
+    },
+    "equipment_id": {
+      "type": "string"
+    },
+    "sensor_id": {
+      "type": "string"
+    },
+    "batch_id": {
+      "type": ["string", "null"]
+    },
+    "metric_name": {
+      "type": "string"
+    },
+    "metric_value": {
+      "type": "number"
+    },
+    "metric_unit": {
+      "type": "string"
+    },
+    "quality_flag": {
+      "type": "string",
+      "enum": ["OK", "WARN", "BAD"]
+    }
+  }
+}
