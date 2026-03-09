@@ -13,40 +13,51 @@
   ],
   "properties": {
     "event_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Unique identifier of the event"
     },
     "event_ts": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Timestamp when the measurement occurred"
     },
     "ingestion_ts": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Timestamp when the event entered the platform"
     },
     "source_system": {
-      "type": "string"
+      "type": "string",
+      "description": "Originating system or device"
     },
     "equipment_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Equipment identifier"
     },
     "sensor_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Sensor identifier"
     },
     "batch_id": {
-      "type": ["string", "null"]
+      "type": ["string", "null"],
+      "description": "Associated production batch"
     },
     "metric_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Measured metric name (temperature, pressure, pH, etc.)"
     },
     "metric_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Numeric measurement value"
     },
     "metric_unit": {
-      "type": "string"
+      "type": "string",
+      "description": "Measurement unit"
     },
     "quality_flag": {
       "type": "string",
-      "enum": ["OK", "WARN", "BAD"]
+      "enum": ["OK", "WARN", "BAD"],
+      "description": "Quality assessment of measurement"
     }
   }
 }

@@ -1,0 +1,51 @@
+{
+  "title": "chem.chemical_mdm.v1",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_ts",
+    "chemical_id",
+    "chemical_name",
+    "cas_number",
+    "is_active"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ingestion_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "chemical_id": {
+      "type": "string"
+    },
+    "chemical_name": {
+      "type": "string"
+    },
+    "cas_number": {
+      "type": "string",
+      "description": "Chemical Abstract Service number"
+    },
+    "hazard_class": {
+      "type": "string",
+      "description": "Hazard classification"
+    },
+    "default_unit": {
+      "type": "string"
+    },
+    "supplier_id": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "version": {
+      "type": "integer"
+    }
+  }
+}

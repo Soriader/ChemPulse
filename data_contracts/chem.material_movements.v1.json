@@ -1,0 +1,72 @@
+{
+  "title": "chem.material_movements.v1",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_ts",
+    "material_id",
+    "movement_type",
+    "quantity",
+    "quantity_unit"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ingestion_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "movement_id": {
+      "type": "string",
+      "description": "Unique movement transaction identifier"
+    },
+    "material_id": {
+      "type": "string",
+      "description": "Material identifier"
+    },
+    "material_type": {
+      "type": "string",
+      "description": "Type of material (sample, reagent, chemical)"
+    },
+    "batch_id": {
+      "type": ["string", "null"]
+    },
+    "from_location": {
+      "type": "string"
+    },
+    "to_location": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "quantity_unit": {
+      "type": "string"
+    },
+    "movement_type": {
+      "type": "string",
+      "enum": [
+        "TRANSFER",
+        "CONSUMPTION",
+        "RECEIPT",
+        "DISPOSAL"
+      ]
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "COMPLETED",
+        "PENDING",
+        "CANCELLED"
+      ]
+    }
+  }
+}
