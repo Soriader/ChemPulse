@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from jsonschema import ValidationError, validate
+from jsonschema import Draft202012Validator, FormatChecker
 
 
-SCHEMA_DIR = Path("schemas")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SCHEMA_DIR = PROJECT_ROOT / "data_contracts"
 
 
 def load_schema(schema_file: str) -> dict:
@@ -16,26 +17,23 @@ def load_schema(schema_file: str) -> dict:
         return json.load(f)
 
 
-def validate_record(record: dict, schema_file: str) -> None:
-    schema = load_schema(schema_file)
-    validate(instance=record, schema=schema)
-
-
 def validate_records(records: list[dict], schema_file: str) -> tuple[list[dict], list[dict]]:
     valid_records: list[dict] = []
     invalid_records: list[dict] = []
 
     schema = load_schema(schema_file)
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
 
     for record in records:
-        try:
-            validate(instance=record, schema=schema)
+        errors = sorted(validator.iter_errors(record), key=lambda e: list(e.path))
+
+        if not errors:
             valid_records.append(record)
-        except ValidationError as e:
+        else:
             invalid_records.append(
                 {
                     "record": record,
-                    "error": e.message,
+                    "errors": [error.message for error in errors],
                 }
             )
 

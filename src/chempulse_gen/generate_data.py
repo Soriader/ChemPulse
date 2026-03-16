@@ -8,6 +8,7 @@ from chempulse_gen.generators import (
     generate_sensor_reading,
 )
 from chempulse_gen.utils import write_jsonl
+from chempulse_gen.validator import validate_records
 
 
 def main() -> None:
@@ -16,16 +17,33 @@ def main() -> None:
     movement_events = generate_many(generate_material_movement, 80)
     chemical_events = generate_many(generate_chemical_mdm, 20)
 
-    write_jsonl("data/raw/chem.sensor_readings.v1.jsonl", sensor_events)
-    write_jsonl("data/raw/chem.lab_results.v1.jsonl", lab_events)
-    write_jsonl("data/raw/chem.material_movements.v1.jsonl", movement_events)
-    write_jsonl("data/raw/chem.chemical_mdm.v1.jsonl", chemical_events)
+    valid_sensor, invalid_sensor = validate_records(
+        sensor_events,
+        "chem.sensor_readings.v1.json",
+    )
+    valid_lab, invalid_lab = validate_records(
+        lab_events,
+        "chem.lab_results.v1.json",
+    )
+    valid_movement, invalid_movement = validate_records(
+        movement_events,
+        "chem.material_movements.v1.json",
+    )
+    valid_chemical, invalid_chemical = validate_records(
+        chemical_events,
+        "chem.chemical_mdm.v1.json",
+    )
 
-    print("Generated ChemPulse raw event files:")
-    print(f" - sensor_readings: {len(sensor_events)}")
-    print(f" - lab_results: {len(lab_events)}")
-    print(f" - material_movements: {len(movement_events)}")
-    print(f" - chemical_mdm: {len(chemical_events)}")
+    write_jsonl("data/raw/chem.sensor_readings.v1.jsonl", valid_sensor)
+    write_jsonl("data/raw/chem.lab_results.v1.jsonl", valid_lab)
+    write_jsonl("data/raw/chem.material_movements.v1.jsonl", valid_movement)
+    write_jsonl("data/raw/chem.chemical_mdm.v1.jsonl", valid_chemical)
+
+    print("Generated and validated ChemPulse raw event files:")
+    print(f" - sensor_readings: valid={len(valid_sensor)}, invalid={len(invalid_sensor)}")
+    print(f" - lab_results: valid={len(valid_lab)}, invalid={len(invalid_lab)}")
+    print(f" - material_movements: valid={len(valid_movement)}, invalid={len(invalid_movement)}")
+    print(f" - chemical_mdm: valid={len(valid_chemical)}, invalid={len(invalid_chemical)}")
 
 
 if __name__ == "__main__":
