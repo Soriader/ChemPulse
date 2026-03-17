@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from chempulse_gen.generators import (
     generate_chemical_mdm,
     generate_lab_result,
@@ -9,6 +11,10 @@ from chempulse_gen.generators import (
 )
 from chempulse_gen.utils import write_jsonl
 from chempulse_gen.validator import validate_records
+
+
+RAW_DIR = Path("data/raw")
+INVALID_DIR = Path("data/invalid")
 
 
 def main() -> None:
@@ -34,15 +40,15 @@ def main() -> None:
         "chem.chemical_mdm.v1.json",
     )
 
-    write_jsonl("data/raw/chem.sensor_readings.v1.jsonl", valid_sensor)
-    write_jsonl("data/raw/chem.lab_results.v1.jsonl", valid_lab)
-    write_jsonl("data/raw/chem.material_movements.v1.jsonl", valid_movement)
-    write_jsonl("data/raw/chem.chemical_mdm.v1.jsonl", valid_chemical)
+    write_jsonl(RAW_DIR / "chem.sensor_readings.v1.jsonl", valid_sensor)
+    write_jsonl(RAW_DIR / "chem.lab_results.v1.jsonl", valid_lab)
+    write_jsonl(RAW_DIR / "chem.material_movements.v1.jsonl", valid_movement)
+    write_jsonl(RAW_DIR / "chem.chemical_mdm.v1.jsonl", valid_chemical)
 
-    write_jsonl("data/invalid/chem.sensor_readings.v1.invalid.jsonl", invalid_sensor)
-    write_jsonl("data/invalid/chem.lab_results.v1.invalid.jsonl", invalid_lab)
-    write_jsonl("data/invalid/chem.material_movements.v1.invalid.jsonl", invalid_movement)
-    write_jsonl("data/invalid/chem.chemical_mdm.v1.invalid.jsonl", invalid_chemical)
+    write_jsonl(INVALID_DIR / "chem.sensor_readings.v1.invalid.jsonl", invalid_sensor)
+    write_jsonl(INVALID_DIR / "chem.lab_results.v1.invalid.jsonl", invalid_lab)
+    write_jsonl(INVALID_DIR / "chem.material_movements.v1.invalid.jsonl", invalid_movement)
+    write_jsonl(INVALID_DIR / "chem.chemical_mdm.v1.invalid.jsonl", invalid_chemical)
 
     print("Generated and validated ChemPulse event files:")
     print(f" - sensor_readings: valid={len(valid_sensor)}, invalid={len(invalid_sensor)}")
