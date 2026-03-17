@@ -39,7 +39,12 @@ def main() -> None:
     write_jsonl("data/raw/chem.material_movements.v1.jsonl", valid_movement)
     write_jsonl("data/raw/chem.chemical_mdm.v1.jsonl", valid_chemical)
 
-    print("Generated and validated ChemPulse raw event files:")
+    write_jsonl("data/invalid/chem.sensor_readings.v1.invalid.jsonl", invalid_sensor)
+    write_jsonl("data/invalid/chem.lab_results.v1.invalid.jsonl", invalid_lab)
+    write_jsonl("data/invalid/chem.material_movements.v1.invalid.jsonl", invalid_movement)
+    write_jsonl("data/invalid/chem.chemical_mdm.v1.invalid.jsonl", invalid_chemical)
+
+    print("Generated and validated ChemPulse event files:")
     print(f" - sensor_readings: valid={len(valid_sensor)}, invalid={len(invalid_sensor)}")
     print(f" - lab_results: valid={len(valid_lab)}, invalid={len(invalid_lab)}")
     print(f" - material_movements: valid={len(valid_movement)}, invalid={len(invalid_movement)}")
