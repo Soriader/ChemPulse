@@ -33,7 +33,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--save-to-file",
-        help="Optional path to JSONL output file, e.g. data/consumed/sensor_readings.jsonl",
+        action="store_true",
+        help="Save events into valid/invalid JSONL files",
     )
     parser.add_argument(
         "--event-field",
@@ -81,14 +82,18 @@ def save_event_to_file(event: dict[str, Any], file_path: str) -> None:
     with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(event, ensure_ascii=False) + "\n")
 
+
 def is_valid_event(event: dict[str, Any]) -> bool:
     return event.get("quality_flag") == "OK"
 
 
-def route_event(event: dict[str, Any]) -> str:
+def route_event(topic: str, event: dict[str, Any]) -> str:
+    topic_name = topic.replace(".", "_")
+
     if is_valid_event(event):
-        return "data/consumed/valid/sensor_readings.jsonl"
-    return "data/consumed/invalid/sensor_readings.jsonl"
+        return f"data/consumed/valid/{topic_name}.jsonl"
+
+    return f"data/consumed/invalid/{topic_name}.jsonl"
 
 
 def main() -> None:
@@ -125,8 +130,9 @@ def main() -> None:
             print()
 
             if args.save_to_file:
-                output_path = route_event(event)
+                output_path = route_event(message.topic, event)
                 save_event_to_file(event, output_path)
+                print(f"Saved to: {output_path}\n")
 
     except KeyboardInterrupt:
         print("\nConsumer stopped by user.")
