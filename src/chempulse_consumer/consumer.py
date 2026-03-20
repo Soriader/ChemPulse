@@ -81,6 +81,15 @@ def save_event_to_file(event: dict[str, Any], file_path: str) -> None:
     with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(event, ensure_ascii=False) + "\n")
 
+def is_valid_event(event: dict[str, Any]) -> bool:
+    return event.get("quality_flag") == "OK"
+
+
+def route_event(event: dict[str, Any]) -> str:
+    if is_valid_event(event):
+        return "data/consumed/valid/sensor_readings.jsonl"
+    return "data/consumed/invalid/sensor_readings.jsonl"
+
 
 def main() -> None:
     args = parse_args()
@@ -116,7 +125,8 @@ def main() -> None:
             print()
 
             if args.save_to_file:
-                save_event_to_file(event, args.save_to_file)
+                output_path = route_event(event)
+                save_event_to_file(event, output_path)
 
     except KeyboardInterrupt:
         print("\nConsumer stopped by user.")
