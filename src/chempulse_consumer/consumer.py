@@ -7,6 +7,9 @@ from typing import Any
 
 from kafka import KafkaConsumer
 
+from chempulse_consumer.routing import route_event
+from chempulse_consumer.validation import is_valid_event
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simple Kafka consumer for ChemPulse")
@@ -83,19 +86,6 @@ def save_event_to_file(event: dict[str, Any], file_path: str) -> None:
         f.write(json.dumps(event, ensure_ascii=False) + "\n")
 
 
-def is_valid_event(event: dict[str, Any]) -> bool:
-    return event.get("quality_flag") == "OK"
-
-
-def route_event(topic: str, event: dict[str, Any]) -> str:
-    topic_name = topic.replace(".", "_")
-
-    if is_valid_event(event):
-        return f"data/consumed/valid/{topic_name}.jsonl"
-
-    return f"data/consumed/invalid/{topic_name}.jsonl"
-
-
 def main() -> None:
     args = parse_args()
 
@@ -105,6 +95,10 @@ def main() -> None:
         group_id=args.group_id,
         from_beginning=args.from_beginning,
     )
+
+    total_events = 0
+    valid_events = 0
+    invalid_events = 0
 
     print(f"Listening on topic: {args.topic}")
     print(f"Bootstrap servers: {args.bootstrap_servers}")
@@ -122,6 +116,8 @@ def main() -> None:
             if not matches_filter(event, args.event_field, args.event_value):
                 continue
 
+            total_events += 1
+
             print("=== NEW EVENT ===")
             print(f"Topic: {message.topic}")
             print(f"Partition: {message.partition}")
@@ -134,10 +130,19 @@ def main() -> None:
                 save_event_to_file(event, output_path)
                 print(f"Saved to: {output_path}\n")
 
+            if is_valid_event(event):
+                valid_events += 1
+            else:
+                invalid_events += 1
+
     except KeyboardInterrupt:
         print("\nConsumer stopped by user.")
     finally:
         consumer.close()
+        print("\nSummary:")
+        print(f"- total events processed: {total_events}")
+        print(f"- valid events: {valid_events}")
+        print(f"- invalid events: {invalid_events}")
 
 
 if __name__ == "__main__":
