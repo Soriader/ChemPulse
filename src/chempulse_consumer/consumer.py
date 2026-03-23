@@ -9,6 +9,7 @@ from kafka import KafkaConsumer
 
 from chempulse_consumer.routing import route_event
 from chempulse_consumer.validation import is_valid_event
+from chempulse_storage.sql_server_writer import insert_sensor_reading
 
 
 def parse_args() -> argparse.Namespace:
@@ -125,15 +126,21 @@ def main() -> None:
             print(json.dumps(event, indent=2, ensure_ascii=False))
             print()
 
-            if args.save_to_file:
-                output_path = route_event(message.topic, event)
-                save_event_to_file(event, output_path)
-                print(f"Saved to: {output_path}\n")
-
             if is_valid_event(event):
                 valid_events += 1
+
+                inserted = insert_sensor_reading(event)
+                if inserted:
+                    print("Saved to SQL Server: dbo.sensor_readings\n")
+                else:
+                    print("Skipped duplicate event in SQL Server\n")
             else:
                 invalid_events += 1
+
+                if args.save_to_file:
+                    output_path = route_event(message.topic, event)
+                    save_event_to_file(event, output_path)
+                    print(f"Saved to: {output_path}\n")
 
     except KeyboardInterrupt:
         print("\nConsumer stopped by user.")
