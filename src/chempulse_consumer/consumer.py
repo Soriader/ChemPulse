@@ -9,8 +9,7 @@ from kafka import KafkaConsumer
 
 from chempulse_consumer.routing import route_event
 from chempulse_consumer.validation import is_valid_event
-from chempulse_storage.sql_server_writer import insert_sensor_reading
-
+from chempulse_storage.sql_server_writer import insert_event
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simple Kafka consumer for ChemPulse")
@@ -126,10 +125,10 @@ def main() -> None:
             print(json.dumps(event, indent=2, ensure_ascii=False))
             print()
 
-            if is_valid_event(event):
+            if is_valid_event(message.topic, event):
                 valid_events += 1
 
-                inserted = insert_sensor_reading(event)
+                inserted = insert_event(message.topic, event)
                 if inserted:
                     print("Saved to SQL Server: dbo.sensor_readings\n")
                 else:

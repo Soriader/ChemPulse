@@ -7,6 +7,75 @@ import pyodbc
 from dotenv import load_dotenv
 
 
+TOPIC_TO_TABLE = {
+    "chem.sensor_readings.v1": "dbo.sensor_readings",
+    "chem.lab_results.v1": "dbo.lab_results",
+    "chem.material_movements.v1": "dbo.material_movements",
+    "chem.chemical_mdm.v1": "dbo.chemical_mdm",
+}
+
+
+TOPIC_TO_COLUMNS = {
+    "chem.sensor_readings.v1": [
+        "event_id",
+        "event_ts",
+        "ingestion_ts",
+        "source_system",
+        "equipment_id",
+        "sensor_id",
+        "batch_id",
+        "metric_name",
+        "metric_value",
+        "metric_unit",
+        "quality_flag",
+    ],
+    "chem.lab_results.v1": [
+        "event_id",
+        "event_ts",
+        "ingestion_ts",
+        "sample_id",
+        "batch_id",
+        "lab_id",
+        "test_code",
+        "result_value",
+        "result_unit",
+        "method_code",
+        "analyst_id",
+        "result_status",
+        "quality_flag",
+    ],
+    "chem.material_movements.v1": [
+        "event_id",
+        "event_ts",
+        "ingestion_ts",
+        "movement_id",
+        "material_id",
+        "material_type",
+        "batch_id",
+        "from_location",
+        "to_location",
+        "quantity",
+        "quantity_unit",
+        "movement_type",
+        "operator_id",
+        "status",
+    ],
+    "chem.chemical_mdm.v1": [
+        "event_id",
+        "event_ts",
+        "ingestion_ts",
+        "chemical_id",
+        "chemical_name",
+        "cas_number",
+        "hazard_class",
+        "default_unit",
+        "supplier_id",
+        "is_active",
+        "version",
+    ],
+}
+
+
 def build_connection_string() -> str:
     load_dotenv()
 
@@ -36,39 +105,23 @@ def build_connection_string() -> str:
     )
 
 
-def insert_sensor_reading(event: dict[str, Any]) -> bool:
-    conn_str = build_connection_string()
+def insert_event(topic: str, event: dict[str, Any]) -> bool:
+    if topic not in TOPIC_TO_TABLE:
+        raise ValueError(f"Unsupported topic: {topic}")
 
-    query = """
-    INSERT INTO dbo.sensor_readings (
-        event_id,
-        event_ts,
-        ingestion_ts,
-        source_system,
-        equipment_id,
-        sensor_id,
-        batch_id,
-        metric_name,
-        metric_value,
-        metric_unit,
-        quality_flag
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    table_name = TOPIC_TO_TABLE[topic]
+    columns = TOPIC_TO_COLUMNS[topic]
+
+    placeholders = ", ".join(["?"] * len(columns))
+    column_list = ", ".join(columns)
+
+    query = f"""
+    INSERT INTO {table_name} ({column_list})
+    VALUES ({placeholders})
     """
 
-    values = (
-        event.get("event_id"),
-        event.get("event_ts"),
-        event.get("ingestion_ts"),
-        event.get("source_system"),
-        event.get("equipment_id"),
-        event.get("sensor_id"),
-        event.get("batch_id"),
-        event.get("metric_name"),
-        event.get("metric_value"),
-        event.get("metric_unit"),
-        event.get("quality_flag"),
-    )
+    values = tuple(event.get(column) for column in columns)
+    conn_str = build_connection_string()
 
     try:
         with pyodbc.connect(conn_str) as conn:
