@@ -1,8 +1,9 @@
 from chempulse_consumer.validation import is_valid_event
 from chempulse_consumer.routing import route_event
-from chempulse_storage.sql_server_writer import insert_event
+import chempulse_storage.sql_server_writer as sql_writer
 
-#TEST 1 - event validation
+
+# TEST 1 - event validation
 
 def test_is_valid_sensor_event_ok():
     event = {"quality_flag": "OK"}
@@ -23,7 +24,8 @@ def test_is_valid_chemical_mdm_event():
     event = {"is_active": True}
     assert is_valid_event("chem.chemical_mdm.v1", event) is True
 
-#TEST 2 — routing / check if the data is going to the right place
+
+# TEST 2 - routing / check if the data is going to the right place
 
 def test_route_valid_event():
     event = {"quality_flag": "OK"}
@@ -36,16 +38,21 @@ def test_route_invalid_event():
     path = route_event("chem.sensor_readings.v1", event)
     assert "invalid" in path
 
-#TEST 3 — duplicate handling (mock)
+
+# TEST 3 - duplicate handling (mock)
 
 def test_insert_event_duplicate(monkeypatch):
     def mock_insert(*args, **kwargs):
         return False
 
-    monkeypatch.setattr(
-        "chempulse_storage.sql_server_writer.insert_event",
-        mock_insert
-    )
+    monkeypatch.setattr(sql_writer, "insert_event", mock_insert)
 
-    result = insert_event("chem.sensor_readings.v1", {"event_id": "123"})
+    result = sql_writer.insert_event("chem.sensor_readings.v1", {"event_id": "123"})
     assert result is False
+
+
+# TEST 4 - mapping sanity check
+
+def test_topic_to_columns_not_empty():
+    assert "chem.sensor_readings.v1" in sql_writer.TOPIC_TO_COLUMNS
+    assert len(sql_writer.TOPIC_TO_COLUMNS["chem.sensor_readings.v1"]) > 0
