@@ -1,4 +1,6 @@
 from chempulse_consumer.validation import is_valid_event
+from chempulse_consumer.routing import route_event
+from chempulse_storage.sql_server_writer import insert_event
 
 #TEST 1 - event validation
 
@@ -23,9 +25,6 @@ def test_is_valid_chemical_mdm_event():
 
 #TEST 2 — routing / check if the data is going to the right place
 
-from chempulse_consumer.routing import route_event
-
-
 def test_route_valid_event():
     event = {"quality_flag": "OK"}
     path = route_event("chem.sensor_readings.v1", event)
@@ -37,3 +36,16 @@ def test_route_invalid_event():
     path = route_event("chem.sensor_readings.v1", event)
     assert "invalid" in path
 
+#TEST 3 — duplicate handling (mock)
+
+def test_insert_event_duplicate(monkeypatch):
+    def mock_insert(*args, **kwargs):
+        return False
+
+    monkeypatch.setattr(
+        "chempulse_storage.sql_server_writer.insert_event",
+        mock_insert
+    )
+
+    result = insert_event("chem.sensor_readings.v1", {"event_id": "123"})
+    assert result is False
