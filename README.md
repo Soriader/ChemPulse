@@ -45,22 +45,6 @@ In chemical manufacturing and labs, data arrives continuously from multiple syst
 
 ## Architecture & components
 
-```mermaid
-flowchart LR
-  subgraph GEN["Data contracts + generators"]
-    SCHEMA["data_contracts/*.json<br/>(JSON Schema)"] --> VALIDATOR["src/chempulse_gen/validator.py<br/>Draft202012Validator"]
-    GENERATORS["src/chempulse_gen/generators.py<br/>event generators"] --> VALIDATOR
-  end
-
-  VALIDATOR -->|valid event| PRODUCER["src/chempulse_stream/kafka_producer.py<br/>Kafka producer"]
-  PRODUCER --> KAFKA[("Kafka (Docker)<br/>chem.*.v1 topics")]
-
-  KAFKA --> CONSUMER["src/chempulse_consumer/consumer.py<br/>consume + filter + business validation"]
-  CONSUMER -->|valid| WRITER["src/chempulse_storage/sql_server_writer.py<br/>insert_event(topic,event)"]
-  WRITER --> SQL[("SQL Server<br/>dbo.* staging tables")]
-
-  CONSUMER -->|invalid + --save-to-file| DLQ["data/consumed/invalid/*.jsonl<br/>(dead-letter)"]
-
 ### Data flow (high-level)
 
 ```mermaid
@@ -78,7 +62,6 @@ flowchart LR
   WRITER --> SQL[("SQL Server<br/>dbo.* staging tables")]
 
   CONSUMER -->|invalid + --save-to-file| DLQ["data/consumed/invalid/*.jsonl<br/>(dead-letter)"]
-```
 
 ### Repo navigation (primary entry points)
 
@@ -808,20 +791,20 @@ If you want to take this from “portfolio” to “junior production-grade”:
 
 ---
 
-## Development timeline (Mermaid)
+## Development Timeline
 
 ```mermaid
 timeline
-  title ChemPulse - development steps
+  title ChemPulse - Development Timeline
 
   section 2026-03
-    Define JSON Schema contracts per topic (data_contracts/*.json)
-    Implement generators + schema validator (chempulse_gen)
-    Batch generation to JSONL (data/raw + data/invalid)
-    Kafka environment in Docker Compose (Zookeeper + Kafka 7.6.1)
-    Kafka producer (multi-topic, schema-gated publishing)
-    Kafka consumer CLI (filtering, business validation, dead-letter JSONL)
-    SQL Server sink (topic-to-table mapping, dedup by PK)
-    Analytics views in SQL Server
-    Minimal test suite (unit + integration) and repo cleanup
+    Define JSON Schema contracts per topic
+    Implement generators and schema validation
+    Add batch JSONL generation
+    Configure Kafka in Docker Compose
+    Implement Kafka producer
+    Implement Kafka consumer with business validation
+    Add SQL Server sink and deduplication
+    Add analytics views in SQL Server
+    Add unit and integration tests
 ```
